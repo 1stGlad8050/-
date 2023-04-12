@@ -4,55 +4,56 @@ import api from '../api';
 const Users = () => {
   const [users, setUsers] = useState(api.users.fetchAll());
 
-  const handleDelete = (id) => {
-    setUsers((prevState) => prevState.filter((users) => users !== id));
+  const handleDelete = (userId) => {
+    setUsers(users.filter((user) => user._id !== userId));
   };
 
-  const rowCount = users.length;
-  const handleBage = () => {
-    return rowCount === 0
-      ? 'Никто сегодня с тобой не тусует'
-      : `${rowCount} человек сегодня с тобой тусует`;
-  };
-  const getBageClasses = () => {
-    return rowCount === 0 ? 'badge bg-secondary' : 'badge bg-primary';
+  const renderPhrase = (number) => {
+    const lastOne = Number(number.toString().slice(-1));
+    if (number > 4 && number < 15) return 'человек тусанет';
+    if ([2, 3, 4].indexOf(lastOne) >= 0) return 'человека тусанут';
+    if (lastOne === 1) return 'человек тусанет';
+    return 'человек тусанет';
   };
 
   return (
     <>
-      <h1>
-        <span className={getBageClasses()}>{handleBage()}</span>
-      </h1>
-      {rowCount > 0 && (
+      <h2>
+        <span className={'badge ' + (users.length > 0 ? 'bg-primary' : 'bg-danger')}>
+          {users.length > 0
+            ? `${users.length + ' ' + renderPhrase(users.length)} с тобой сегодня`
+            : 'Никто с тобой не тусанет'}
+        </span>
+      </h2>
+
+      {users.length > 0 && (
         <table className="table">
           <thead>
             <tr>
               <th scope="col">Имя</th>
-              <th scope="col">Качество</th>
-              <th scope="col">Професия</th>
-              <th scope="col">Встретился раз</th>
+              <th scope="col">Качества</th>
+              <th scope="col">Профессия</th>
+              <th scope="col">Встретился, раз</th>
               <th scope="col">Оценка</th>
-              <th scope="col"></th>
+              <th />
             </tr>
           </thead>
           <tbody>
-            {users.map((users) => (
-              <tr key={users.id}>
-                <td>{users.name}</td>
+            {users.map((user) => (
+              <tr key={user._id}>
+                <td>{user.name}</td>
                 <td>
-                  {users.qualities.map((qualities) => (
-                    <span key={qualities.name} className={'badge m-2 bg-' + qualities.color}>
-                      {qualities.name}
+                  {user.qualities.map((item) => (
+                    <span className={'badge m-1 bg-' + item.color} key={item._id}>
+                      {item.name}
                     </span>
                   ))}
                 </td>
-                <td>{users.profession.name}</td>
-                <td>{users.completedMeetings}</td>
-                <td>{users.rate} / 5</td>
+                <td>{user.profession.name}</td>
+                <td>{user.completedMeetings}</td>
+                <td>{user.rate} /5</td>
                 <td>
-                  <button
-                    className="btn btn-danger position-relative"
-                    onClick={() => handleDelete(users)}>
+                  <button onClick={() => handleDelete(user._id)} className="btn btn-danger">
                     Удалить
                   </button>
                 </td>
